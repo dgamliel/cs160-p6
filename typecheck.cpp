@@ -374,6 +374,7 @@ void TypeCheck::visitAssignmentNode(AssignmentNode* node) {
           if (ID1.baseType == bt_object) {
             ID1.objectClassName = classTable->find(superClass)->second.members->find(ID1Name)->second.type.objectClassName;
           }
+          break;
         }
         else {
           superClass = classTable->find(superClass)->second.superClassName;
@@ -460,8 +461,8 @@ void TypeCheck::visitAssignmentNode(AssignmentNode* node) {
     // Check if basetypes are the same
     if (node->identifier_2) {
       if (ID2.baseType != node->expression->basetype) {
-        CompoundType expr;
-        expr.baseType = node->expression->basetype;
+        // CompoundType expr;
+        // expr.baseType = node->expression->basetype;
         //std::cout << "Case where ID2 exists\n\n";
         //std::cout << "Assignment node: " + string(ID2) + " vs. " + string(expr) + "\n\n"; 
         typeError(assignment_type_mismatch);
@@ -470,11 +471,10 @@ void TypeCheck::visitAssignmentNode(AssignmentNode* node) {
      
     else {
       if (ID1.baseType != node->expression->basetype) {
-        CompoundType expr;
-        expr.baseType = node->expression->basetype;
+        // CompoundType expr;
+        // expr.baseType = node->expression->basetype;
         //std::cout << "Case where ID2 DOES NOT exist\n\n";  
         //std::cout << "Assignment node: " + string(ID1) + " vs. " + string(expr) + "\n\n"; 
-
     
         typeError(assignment_type_mismatch);
       }
@@ -710,7 +710,7 @@ void TypeCheck::visitMethodCallNode(MethodCallNode* node) {
 
   //Case: class.method(arg1, arg2, ... )
 	//TODO: Check if class is inherrited from super class and check if method is inherrited from a super class 
-  if(node->identifier_2){
+  if (node->identifier_2){
 
     //Name of the variable
 		callingClassName = node->identifier_1->name;
@@ -761,10 +761,9 @@ void TypeCheck::visitMethodCallNode(MethodCallNode* node) {
 
     }
 
-
-    if (!classFound)
+    if (!classFound) {
       typeError(undefined_variable);
-
+    }
     //Check that callingClassName is an actual variable of type class
     if (ID1.baseType != bt_object)
       typeError(not_object);
@@ -822,24 +821,26 @@ void TypeCheck::visitMethodCallNode(MethodCallNode* node) {
 		}
 
 		//If we didn't find the method, we need to see if it's inherrited from a superclass
-		std::string superClassName = (*classTable)[currentClassName].superClassName;
+		else {
+      std::string superClassName = (*classTable)[currentClassName].superClassName;
 
-		//For each super class, check if the method is defined
-		while (superClassName != ""){
-			MethodTable* superClassMethods = (*classTable)[superClassName].methods;
+      //For each super class, check if the method is defined
+      while (superClassName != ""){
+        MethodTable* superClassMethods = (*classTable)[superClassName].methods;
 
-			//We found the className and everthing is fine
-			if (superClassMethods->count(methodName) != 0){
-        //std::cout << "found method : " + methodName + " in class " + superClassName << std::endl;
-				methodFound = true;
-        objectCName = superClassName;
+        //We found the className and everthing is fine
+        if (superClassMethods->count(methodName) != 0){
+          //std::cout << "found method : " + methodName + " in class " + superClassName << std::endl;
+          methodFound = true;
+          objectCName = superClassName;
 
-				break;
-			}
+          break;
+        }
 
-			//Else we didn't find the method so we update the superclass and keep looking
-			superClassName = (*classTable)[superClassName].superClassName;
-		}
+        //Else we didn't find the method so we update the superclass and keep looking
+        superClassName = (*classTable)[superClassName].superClassName;
+      }
+    }
 
 		//After checking all the superclasses we didn't find the method so throw an error
 		if (!methodFound){
@@ -1035,12 +1036,7 @@ void TypeCheck::visitVariableNode(VariableNode* node) {
         inSuperClass = true;
         break;
       }
-      else {
-        superClass = classTable->find(superClass)->second.superClassName;
-      }  
-
       superClass = (*classTable)[superClass].superClassName;
-
     }
 
     if (inSuperClass) {
@@ -1050,12 +1046,14 @@ void TypeCheck::visitVariableNode(VariableNode* node) {
         node->objectClassName = classTable->find(superClass)->second.members->find(varName)->second.type.objectClassName;
       }
     }
+
     else {
       typeError(undefined_variable);
     }
   }
   
   else {
+
     typeError(undefined_variable);
   }
 
