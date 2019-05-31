@@ -704,8 +704,8 @@ void TypeCheck::visitMethodCallNode(MethodCallNode* node) {
   std::string classContainingMethod;
   std::string objectCName = "";
 
-	bool methodFound;
-	bool classFound;
+	bool methodFound = false;
+	bool classFound = false;
 
 
   //Case: class.method(arg1, arg2, ... )
@@ -853,13 +853,16 @@ void TypeCheck::visitMethodCallNode(MethodCallNode* node) {
 	BaseType argType, paramType;
 
 
-  //std::cout << "Attempting to find method info for method " + methodName + " in class " + objectCName << std::endl;
-
+  //std::cout << "class - " + objectCName + " | method - " + methodName << std::endl;
 
   //This line segfaults --> we don't find the method
-  if ( (*classTable)[objectCName].methods->find(methodName) == (*classTable)[objectCName].methods->end() )
-    ;
-    //std::cout << "WE DIDN'T FIND THE METHOD BUT WE SHOULD HAVE THROWN AN ERROR EARLIER OOPSIE WOOPSIE" << std::endl;
+  if ( (*classTable)[objectCName].methods->find(methodName) == (*classTable)[objectCName].methods->end() ){
+    std::cout << "looking for method - " + methodName + " | class - " + objectCName << std::endl; 
+    for (auto it = (*classTable)[objectCName].methods->begin(); it != (*classTable)[objectCName].methods->end(); ++it){
+      std::cout << "method - " + it->first << std::endl;  
+    } 
+  }
+
 
   MethodInfo mi = (*classTable)[objectCName].methods->find(methodName)->second;
 
